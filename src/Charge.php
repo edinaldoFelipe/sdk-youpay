@@ -128,12 +128,33 @@ class Charge extends Resource
   private function processParamsNewPayment(\stdClass $params): array
   {
     return [
-      'method' => $params->method ?? 'bank_slip', // bank_slip | pix | card | pos
-      'amount' => preg_replace('/[^\d.]/', '', $params->amount),
-      'idCharge' => $params->idCharge,
-      'customerName' => $params->customerName,
-      'customerTypeDocument' => $params->customerTypeDocument ?? 'CPF',
-      'customerDocument' => preg_replace('/[^\d]/', '', $params->customerDocument),
+      ...($params->method ? (array)$params : []),
+      ...[
+        'method' => $params->method ?? 'bank_slip', // bank_slip | pix | card | pos
+        'amount' => preg_replace('/[^\d.]/', '', $params->amount),
+        'idCharge' => $params->idCharge,
+        'customerName' => $params->customerName,
+        'customerTypeDocument' => $params->customerTypeDocument ?? 'CPF',
+        'customerDocument' => preg_replace('/[^\d]/', '', $params->customerDocument),
+      ]
     ];
   }
 }
+
+// method' => 'card',
+//       'amount' => preg_replace('/[^\d.]/', '', $params->amount),
+//       'idCharge' => $params->idCharge,
+//       'customerName' => $params->customerName,
+//       'posPaymentType' => $params->posPaymentType ?? 'credit', // credit | debit | voucher
+//       'customerTypeDocument' => $params->customerTypeDocument ?? 'CPF',
+//       'customerDocument' => preg_replace('/[^\d]/', '', $params->customerDocument),
+//       'customerEmail' => $params->customerEmail,
+//       'customerCellphone' => preg_replace('/[^\d]/', '', $params->customerCellphone),
+//       'customerStreet' => $params->customerStreet,
+//       'customerNumber' => $params->customerNumber,
+//       'customerDistrict' => $params->customerDistrict,
+//       'customerCity' => $params->customerCity,
+//       'customerState' => substr($params->customerState, 0, 2),
+//       'customerPostalCode' => preg_replace('/[^\d]/', '', $params->customerPostalCode),
+//       'installments' => $params->installments,
+//       'idCard'

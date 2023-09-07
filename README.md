@@ -78,3 +78,9 @@ Run
 ```sh
 composer tests
 ```
+
+Unique
+
+```sh
+vendor/bin/phpunit --filter testPaymentCreditCardSuccess tests/Unit/CreditCardTest.php
+```
