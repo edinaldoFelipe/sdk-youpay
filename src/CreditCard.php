@@ -19,17 +19,47 @@ class CreditCard extends Resource
   }
 
   /**
-   * Register charge
+   * Register charge by credit card
    * 
-   * @param string pagadorDocumentoTipo		Defined 1 - 1 CPF, 2 CNPJ
-   * @param string pagadorDocumentoNumero		CPF or CNPJ
-   * @param string pagadorNome
+   * @param string description
+   * @param float amount
+   * @param string due_at                         Default Today
+   * @param string name_notification
+   * @param string cellphone_notification
+   * @param string email_notification
+   * 
+   * @return mixed
+   */
+  public function register(array $params = [])
+  {
+    $charge = new Charge();
+    return $charge->register([
+      ...[
+        'allow_card' => true,
+        'allow_pix' => false,
+        'allow_boleto' => false,
+        'type_transaction_installments' => 'INSTALL_WITH_INTEREST',
+      ],
+      ...$params
+    ]);
+  }
+
+  /**
+   * Payment by credit card
+   * 
+   * @param string description
+   * @param float amount
+   * @param string due_at                         Default Today
+   * @param string name_notification
+   * @param string cellphone_notification
+   * @param string email_notification
+   * 
    * @return mixed
    */
   public function payment(array $params = [])
   {
-    return $this->create('payment', $params);
-    // return $this->create($this->getDefaultValuesToRegisterCharge((object)$params));
+    $charge = new Charge();
+    return $charge->payment($this->getDefaultValuesCreditCard((object)$params));
   }
 
   /**
@@ -51,13 +81,41 @@ class CreditCard extends Resource
    */
   private function getDefaultValuesCreditCard(\stdClass $params): array
   {
+    if (!$params->idCard) {
+      $cofre = new Cofre();
+      $cofre = $cofre->register(
+        [
+          'description' => "Credit card from $params->customerName",
+          'cardholder_name' => $params->customerName,
+          'cpf' => $params->customerDocument,
+          'card_number' => $params->numberCard,
+          'expiration_info' => $params->expiryCard,
+          'cvc' => $params->cvcCard,
+          'email' => $params->customerEmail,
+          'phone' => $params->customerCellphone,
+        ]
+      );
+      $params->idCard = $cofre->id;
+    }
+
     return [
-      "numero" => preg_replace('/[^\d]/', '', $params->numero),
-      "bandeira" => self::getFlag($params->numero),
-      "codigoSeguranca" => $params->codigoSeguranca,
-      "validadeMes" => str_pad($params->validadeMes, 2, 0, STR_PAD_LEFT),
-      "validadeAno" => substr($params->validadeAno, -2),
-      "nomeTitular" => $params->nomeTitular
+      'method' => 'card',
+      'amount' => preg_replace('/[^\d.]/', '', $params->amount),
+      'idCharge' => $params->idCharge,
+      'customerName' => $params->customerName,
+      'posPaymentType' => $params->posPaymentType ?? 'credit', // credit | debit | voucher
+      'customerTypeDocument' => $params->customerTypeDocument ?? 'CPF',
+      'customerDocument' => preg_replace('/[^\d]/', '', $params->customerDocument),
+      'customerEmail' => $params->customerEmail,
+      'customerCellphone' => preg_replace('/[^\d]/', '', $params->customerCellphone),
+      'customerStreet' => $params->customerStreet,
+      'customerNumber' => $params->customerNumber,
+      'customerDistrict' => $params->customerDistrict,
+      'customerCity' => $params->customerCity,
+      'customerState' => substr($params->customerState, 0, 2),
+      'customerPostalCode' => preg_replace('/[^\d]/', '', $params->customerPostalCode),
+      'installments' => $params->installments,
+      'idCard' => $params->idCard,
     ];
   }
 
@@ -149,6 +207,9 @@ class CreditCard extends Resource
         break;
       case '65':
         return 'discover';
+        break;
+      default:
+        '';
         break;
     }
   }

@@ -22,15 +22,42 @@ class Charge extends Resource
   /**
    * Register charge
    * 
-   * @param string pagadorDocumentoTipo		Defined 1 - 1 CPF, 2 CNPJ
-   * @param string pagadorDocumentoNumero		CPF or CNPJ
-   * @param string pagadorNome
+   * @param bool allow_card                       Default false
+   * @param bool allow_pix                        Default true
+   * @param bool allow_boleto                     Default true
+   * @param bool use_only_once                    Default true
+   * @param string description
+   * @param string type_transaction_installments  Default FULL    Options FULL | INSTALL_WITH_INTEREST | INSTALL_NO_INTEREST
+   * @param string installments_max_allow         Default 1
+   * @param float amount
+   * @param string due_at                         Default Today
+   * @param string name_notification
+   * @param string cellphone_notification
+   * @param string email_notification
+   * @param string type_transaction               Default LATER   Options LATER | NOW
+   * 
    * @return mixed
    */
   public function register(array $params = [])
   {
-    return $this->create('new', $params);
-    // return $this->create($this->getDefaultValuesToRegisterCharge((object)$params));
+    return $this->create('new', $this->processParamsNewCharge((object)$params));
+  }
+
+  /**
+   * Generate method payment
+   * 
+   * @param string                        Default bank_slip  Options bank_slip | pix | card | pos
+   * @param float amount
+   * @param string idCharge
+   * @param string customerName
+   * @param string customerTypeDocument   Default CPF
+   * @param string customerDocument
+   * 
+   * @return mixed
+   */
+  public function payment(array $params = [])
+  {
+    return $this->create('payment', $this->processParamsNewPayment((object)$params));
   }
 
   /**
@@ -67,52 +94,46 @@ class Charge extends Resource
   }
 
   /**
-   * Process required params
+   * Process create required params
    * 
    * @param stdClass $params
    * @return array
    */
-  private function getDefaultValuesToRegisterCharge(\stdClass $params): array
+  private function processParamsNewCharge(\stdClass $params): array
   {
-    $numberDocument = $this->formatDocument($params->pagadorDocumentoNumero);
-
     return [
-      'pagadorDocumentoTipo' => strlen($numberDocument) > 11 ? 2 : 1,
-      'pagadorDocumentoNumero' => $numberDocument,
-      'pagadorNome' => substr($params->pagadorNome ?? '', 0, 40),
-      'pagadorEndereco' => substr($params->pagadorEndereco ?? '', 0, 40),
-      'pagadorBairro' => $params->pagadorBairro ?? null,
-      'pagadorCidade' => substr($params->pagadorCidade ?? '', 0, 20),
-      'pagadorUf' => $params->pagadorUf ?? null,
-      'pagadorCep' => preg_replace('/[^\d]/', '', $params->pagadorCep ?? ''),
-      'dataVencimento' => $params->dataVencimento ?? null,
-      'valorNominal' => $params->valorNominal ?? null,
-      'multaPercentual' => $params->multaPercentual ?? 2,
-      'multaQuantidadeDias' => $params->multaQuantidadeDias ?? 0,
-      'jurosPercentual' => 2,
-      'tipoDesconto' => $params->tipoDesconto ?? 0,
-      'descontoValor' => $params->descontoValor ?? 0,
-      'descontoDataLimite' => $params->descontoDataLimite ?? date('Y-m-d'),
-      'tipoProtesto' => 0,
-      'protestoQuantidadeDias' => 0,
-      'baixaQuantidadeDias' => $params->baixaQuantidadeDias ?? 28,
-      'mensagem' => $params->mensagem ?? '',
-      'tipoTitulo' => 4,
-      'seuNumero' => $params->seuNumero ?? '',
-      // 'convenioId' => Config::getSACADOR_ID(),
-      'pagadorEmail' => $params->pagadorEmail ?? ''
+      'allow_card' => $params->allow_card ?? false,
+      'allow_pix' => $params->allow_pix ?? true,
+      'allow_boleto' => $params->allow_boleto ?? true,
+      'use_only_once' => $params->use_only_once ?? true,
+      'description' => $params->description ?? null,
+      // FULL | INSTALL_WITH_INTEREST | INSTALL_NO_INTEREST
+      'type_transaction_installments' => $params->type_transaction_installments ?? 'FULL',
+      'installments_max_allow' => $params->installments_max_allow ?? 1,
+      'amount' => preg_replace('/[^\d.]/', '', $params->amount),
+      'due_at' => $params->due_at ?? date('Y-m-d'),
+      'name_notification' =>  $params->name_notification ?? null,
+      'cellphone_notification' => preg_replace('/[^\d]/', '', $params->cellphone_notification),
+      'email_notification' => $params->email_notification ?? null,
+      'type_transaction' => $params->type_transaction ?? 'LATER', // LATER | NOW
     ];
   }
 
   /**
-   * Format Document CPF / CNPJ
+   * Process payment required params
    * 
-   * @param string $number	CPF/CNPJ
-   * @return string
+   * @param stdClass $params
+   * @return array
    */
-  private function formatDocument(string $number = ''): string
+  private function processParamsNewPayment(\stdClass $params): array
   {
-    $number = preg_replace('/[^\d]/', '', $number);
-    return str_pad($number, (strlen($number) > 11 ? 14 : 11), 0, STR_PAD_LEFT);
+    return [
+      'method' => $params->method ?? 'bank_slip', // bank_slip | pix | card | pos
+      'amount' => preg_replace('/[^\d.]/', '', $params->amount),
+      'idCharge' => $params->idCharge,
+      'customerName' => $params->customerName,
+      'customerTypeDocument' => $params->customerTypeDocument ?? 'CPF',
+      'customerDocument' => preg_replace('/[^\d]/', '', $params->customerDocument),
+    ];
   }
 }

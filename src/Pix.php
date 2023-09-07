@@ -19,21 +19,55 @@ class Pix extends Resource
   }
 
   /**
-   * Create new Pix Purchase
+   * Create new Pix Purchase Avulse
    * 
-   * @param string pagadorCpfCnpj				CPF or CNPJ
-   * @param string pagadorNome		
-   * @param string mensagem
-   * @param double valorCobrado				amount
-   * @param string dataVencimento			 	yyyy-mm-dd
-   * @param string webhookUrl				 	Defined null
-   * @param object listaInformacoesAdicionais	Defined null
+   * @return mixed
+   */
+  public function registerAvulse(array $params = [])
+  {
+    return $this->create(null, $params);
+  }
+
+  /**
+   * Register pix
+   * 
+   * @param string description
+   * @param float amount
+   * @param string due_at                         Default Today
+   * @param string name_notification
+   * @param string cellphone_notification
+   * @param string email_notification
+   * 
    * @return mixed
    */
   public function register(array $params = [])
   {
-    // return $this->create($this->getDefaultValuesToRegisterCharge((object)$params));
-    return $this->create(null, $params);
+    $charge = new Charge();
+    return $charge->register([
+      ...['allow_boleto' => false],
+      ...$params
+    ]);
+  }
+
+  /**
+   * Payment pix
+   * 
+   * @param string description
+   * @param float amount
+   * @param string due_at                         Default Today
+   * @param string name_notification
+   * @param string cellphone_notification
+   * @param string email_notification
+   * 
+   * @return mixed
+   */
+  public function generateQRCode(array $params = [])
+  {
+    $charge = new Charge();
+    return $charge->payment([
+      ...['method' => 'pix'],
+      ...$params
+    ]);
   }
 
   /**
@@ -45,16 +79,5 @@ class Pix extends Resource
   public function find(string $id)
   {
     return $this->retrieve($id);
-  }
-
-  /**
-   * Fill required params
-   * 
-   * @param stdClass $params
-   * @return array
-   */
-  private function getDefaultValuesToRegisterCharge(\stdClass $params): array
-  {
-    return [];
   }
 }

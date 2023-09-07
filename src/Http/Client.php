@@ -14,7 +14,7 @@ class Client extends Guzzle
 {
 
   /**
-   * create authorized client
+   * Constructor
    * 
    * @return void
    */
@@ -39,22 +39,33 @@ class Client extends Guzzle
     }
   }
 
+  /**
+   * Check access token
+   * 
+   * @return void
+   * @throws GuzzleException
+   */
   static public function refreshToken(): void
   {
-    if (!Config::getAccessToken() || !Config::getExpireTime() || (Config::getExpireTime() - time() < 0)) {
-      $credentials = Client::generateAuthenticationCurl();
-      $envContents = file_get_contents('.env');
-      $envContents = preg_replace('/YOUPAY_ACCESS_TOKEN=(.*)/', 'YOUPAY_ACCESS_TOKEN=' . $credentials->access_token, $envContents);
-      $envContents = preg_replace('/YOUPAY_EXPIRE_TIME=(.*)/', 'YOUPAY_EXPIRE_TIME=' . time() + $credentials->expires_in, $envContents);
+    try {
+      if (!Config::getAccessToken() || !Config::getExpireTime() || (Config::getExpireTime() - time() < 0)) {
+        $credentials = Client::generateAuthenticationCurl();
+        $envContents = file_get_contents('.env');
+        $envContents = preg_replace('/YOUPAY_ACCESS_TOKEN=(.*)/', 'YOUPAY_ACCESS_TOKEN=' . $credentials->access_token, $envContents);
+        $envContents = preg_replace('/YOUPAY_EXPIRE_TIME=(.*)/', 'YOUPAY_EXPIRE_TIME=' . time() + $credentials->expires_in, $envContents);
 
-      file_put_contents('.env', $envContents);
+        file_put_contents('.env', $envContents);
+      }
+    } catch (GuzzleException $error) {
+      throw $error;
     }
   }
 
   /**
    * Generate valide access token
    * 
-   * @throws \Exception
+   * @return \stdClass
+   * @throws GuzzleException
    */
   static public function generateAuthenticationCurl(): \stdClass
   {

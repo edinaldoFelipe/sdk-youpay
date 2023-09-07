@@ -14,26 +14,20 @@ class CofreTest extends TestCase
     $dotenv->load();
   }
 
-  // public function testCreateCofreSuccess()
-  // {
-  //   $cofre = new Cofre();
-  //   $result = $cofre->register([]);
-
-  //   self::$cofre_id = $result->id;
-  //   $this->assertArrayHasKey('id', (array)$result);
-  // }
-
-  // public function testFindCofreSuccess()
-  // {
-  //   $cofre = new Cofre();
-  //   $result = $cofre->find(self::$cofre_id);
-  //   $this->assertArrayHasKey('id', (array)$result);
-  // }
-
-  // public function testDeleteCofreSuccess()
-  // {
-  //   $cofre = new Cofre();
-  //   $result = $cofre->destroy(self::$cofre_id);
-  //   $this->assertNull($result);
-  // }
+  public function testCreateCofreSuccess()
+  {
+    $cofre = new Cofre();
+    $result = $cofre->register([
+      'description' => 'Test Card',
+      'cardholder_name' => 'EDINALDO FELIPE S',
+      'cpf' => '07921246427',
+      'card_number' => '4000000000000010',
+      'expiration_info' => '12/27',
+      'cvc' => 926,
+      'email' => 'edinaldosantyago@hotmail.com',
+      'phone' => '47989274343',
+    ]);
+    self::$cofre_id = $result->details->card_id;
+    $this->assertArrayHasKey('card_id', (array)$result->details);
+  }
 }
