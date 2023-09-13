@@ -63,14 +63,27 @@ class CreditCard extends Resource
   }
 
   /**
-   * Cancel payment same day
+   * Get charge by ID
    * 
-   * @param string pagamentoId
+   * @param string $id	 	ID of the charge
    * @return mixed
    */
-  public function cancelCharge(string $paymentId, string $chargeId)
+  public function find(string $id)
   {
-    return $this->delete("cancel/id_charge/$chargeId?id_payment=$paymentId");
+    $charge = new Charge();
+    return $charge->retrieve($id);
+  }
+
+  /**
+   * Reversal payment by credit card
+   * 
+   * @param string paymentId
+   * @param string chargeId
+   * @return mixed
+   */
+  public function reversal(string $paymentId, string $chargeId)
+  {
+    return $this->delete("cancel/$chargeId?id_payment=$paymentId");
   }
 
   /**
@@ -117,60 +130,6 @@ class CreditCard extends Resource
       'installments' => $params->installments,
       'idCard' => $params->idCard,
     ];
-  }
-
-  /**
-   * Fill required values to purchase
-   * 
-   * @param stdClass $params
-   * @return array
-   */
-  private function getParamsPurchase(\stdClass $params): array
-  {
-    $arrayNameComprador = explode(" ", $params->comprador->nomeCompleto);
-    $data = [
-      'id' => $params->id,
-      'valor' => number_format($params->valor),
-      'comprador' => [
-        'id' => $params->comprador->id,
-        'documentoNumero' => preg_replace('/[^\d]/', '', $params->comprador->documentoNumero),
-        'documentoTipo' => strlen(preg_replace('/[^\d]/', '', $params->comprador->documentoNumero)) > 11 ? 2 : 1,
-        'email' => $params->comprador->email ?? null,
-        'nomeCompleto' => $params->comprador->nomeCompleto,
-        'primeiroNome' => $arrayNameComprador[0],
-        'ultimoNome' => array_pop($arrayNameComprador),
-        'enderecoLogradouro' => $params->comprador->enderecoLogradouro,
-        'enderecoNumero' => $params->comprador->enderecoNumero ?? 'SN',
-        'enderecoComplemento' => $params->comprador->enderecoComplemento ?? '',
-        'enderecoCep' => preg_replace('/[^\d]/', '', $params->comprador->enderecoCep),
-        'enderecoBairro' => $params->comprador->enderecoBairro,
-        'enderecoCidade' => $params->comprador->enderecoCidade,
-        'enderecoEstado' => $params->comprador->enderecoEstado,
-        'telefone' => $params->comprador->telefone ?? ''
-      ],
-      'tipoTransacao' => ($params->quantidadeParcelas ?? 1) > 1 ? 'PARCELADO_SEM_JUROS' : 'A_VISTA',
-      'quantidadeParcelas' => $params->quantidadeParcelas ?? 1,
-      // 'convenioId' => Config::getSACADOR_ID(),
-      // 'terminalId' => Config::getSACADOR_ID(),
-      'gerarLinkPagamento' => $params->gerarLinkPagamento ?? false
-    ];
-
-    if ($params->cofreId)
-      $data['cartao'] = [
-        'id' => $params->cofreId
-      ];
-    else
-      $data['cartao'] = [
-        'numero' => preg_replace('/[^\d]/', '', $params->cartao->numero),
-        'codigoSeguranca' => $params->cartao->codigoSeguranca,
-        'nome' => $params->cartao->nome,
-        'expiracaoAno' => substr($params->cartao->expiracaoAno, -2),
-        'expiracaoMes' => str_pad($params->cartao->expiracaoMes, 2, 0, STR_PAD_LEFT),
-        'bandeira' => self::getFlag($params->cartao->numero),
-        'incluirCofre' => $params->cartao->incluirCofre ?? false
-      ];
-
-    return $data;
   }
 
   /**

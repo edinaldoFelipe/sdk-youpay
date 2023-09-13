@@ -8,6 +8,7 @@ use Smart\SdkYoupay\Charge;
 class CreditCardTest extends TestCase
 {
   static $credit_card_id;
+  static $payment_id;
 
   protected function setUp(): void
   {
@@ -15,10 +16,10 @@ class CreditCardTest extends TestCase
     $dotenv->load();
   }
 
-  public function testCreateChargeSuccess()
+  public function testCreateChargeCreditCardSuccess()
   {
     $charge = new CreditCard();
-    $result = $charge->register([
+    $response = $charge->register([
       'description' => 'charge test',
       'installments_max_allow' => '12',
       'amount' => 9.99,
@@ -26,14 +27,14 @@ class CreditCardTest extends TestCase
       'cellphone_notification' => '81997723214',
       'email_notification' => 'edinaldosantyago@hotmail.com',
     ]);
-    self::$credit_card_id = $result->id;
-    $this->assertArrayHasKey('id', (array)$result);
+    self::$credit_card_id = $response->id;
+    $this->assertArrayHasKey('id', (array)$response);
   }
 
   public function testPaymentCreditCardSuccess()
   {
     $charge = new CreditCard();
-    $result = $charge->payment([
+    $response = $charge->payment([
       'amount' => 9.99,
       'idCharge' => self::$credit_card_id,
       'customerName' => 'Edinaldo Felipe',
@@ -52,12 +53,25 @@ class CreditCardTest extends TestCase
       'customerState' => 'PE',
       'customerPostalCode' => '88000000',
       'installments' => '12',
-      'idCard' => 'card_Ln9qW60iYilQjXAw',
+      'idCard' => 'card_oBk0meRfmEFgj0W3',
     ]);
-    var_dump($result);
 
-    $this->assertArrayHasKey('id', (array)$result);
+    $this->assertEquals('Pagamento processado', $response->msg);
   }
 
-  // estorno
+  public function testFindChargeSuccess()
+  {
+    $charge = new CreditCard();
+    $response = $charge->find(self::$credit_card_id);
+    self::$payment_id = $response->payments[0]->id;
+    $this->assertIsNumeric(self::$payment_id);
+  }
+
+  public function testReversalCreditCardSuccess()
+  {
+    $charge = new CreditCard();
+    $response = $charge->reversal(self::$payment_id, self::$credit_card_id);
+
+    $this->assertEquals('Sucesso', $response->msg);
+  }
 }

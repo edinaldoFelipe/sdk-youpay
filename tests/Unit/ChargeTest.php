@@ -17,47 +17,47 @@ class ChargeTest extends TestCase
   public function testCreateChargeSuccess()
   {
     $charge = new Charge();
-    $result = $charge->register([
+    $response = $charge->register([
       'description' => 'charge test',
       'amount' => 9.99,
       'name_notification' => 'James',
       'cellphone_notification' => '81997723214',
       'email_notification' => 'edinaldosantyago@hotmail.com',
     ]);
-    self::$charge_id = $result->id;
-    $this->assertArrayHasKey('id', (array)$result);
+    self::$charge_id = $response->id;
+    $this->assertArrayHasKey('id', (array)$response);
   }
 
   public function testFindChargeSuccess()
   {
     $charge = new Charge();
-    $result = $charge->find(self::$charge_id);
-    $this->assertArrayHasKey('id', (array)$result);
+    $response = $charge->find(self::$charge_id);
+    $this->assertArrayHasKey('id', (array)$response);
   }
 
   public function testGenerateBarcodeSuccess()
   {
     $charge = new Charge();
-    $result = $charge->payment([
+    $response = $charge->payment([
       'amount' => 9.0,
       'idCharge' => self::$charge_id,
       'customerName' => 'Edinaldo Felipe',
       'customerDocument' => '07921246427'
     ]);
-    $this->assertArrayHasKey('id', (array)$result->charge);
+    $this->assertArrayHasKey('id', (array)$response->charge);
   }
 
   public function testListChargeSuccess()
   {
     $charge = new Charge();
-    $result = $charge->index();
-    $this->assertIsArray($result);
+    $response = $charge->index();
+    $this->assertIsArray($response);
   }
 
   public function testDeleteChargeSuccess()
   {
     $charge = new Charge();
-    $result = $charge->destroy(self::$charge_id);
-    $this->assertEquals('Sucesso', $result->msg);
+    $response = $charge->destroy(self::$charge_id);
+    $this->assertEquals('Sucesso', $response->msg);
   }
 }

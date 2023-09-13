@@ -17,7 +17,7 @@ class PixTest extends TestCase
 
   public function testGenerateAvulsePixSuccess()
   {
-    $this->assertEquals(1, 1);
+    // $this->assertEquals(1, 1);
 
     // $pix = new Pix();
     // $result = $pix->registerAvulse([
@@ -26,7 +26,6 @@ class PixTest extends TestCase
     //   'amount' => '9.99',
     //   'due_at' => '2023-09-10',
     // ]);
-    // var_dump($result);
     // self::$pix_id = $result->id;
     // $this->assertArrayHasKey('id', (array)$result);
   }
