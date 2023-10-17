@@ -73,14 +73,20 @@ YOUPAY_URL=https://homolog.youpay.digital/
 
 ## Tests
 
-Run
+### Run All Tests
 
 ```sh
 composer tests
 ```
 
-Unique
+### Unique file
 
 ```sh
-vendor/bin/phpunit --filter testPaymentCreditCardSuccess tests/Unit/CreditCardTest.php
+vendor/bin/phpunit tests --colors auto --testdox tests/Unit/ChargeTest.php 
+```
+
+### Unique test
+
+```sh
+vendor/bin/phpunit tests --colors auto --testdox --filter testListChargeSuccess tests/Unit/ChargeTest.php
 ```

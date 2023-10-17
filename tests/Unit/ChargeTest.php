@@ -18,11 +18,10 @@ class ChargeTest extends TestCase
   {
     $charge = new Charge();
     $response = $charge->register([
-      'description' => 'charge test',
+      'description' => 'Charge test',
       'amount' => 9.99,
-      'name_notification' => 'James',
-      'cellphone_notification' => '81997723214',
-      'email_notification' => 'edinaldosantyago@hotmail.com',
+      'name_notification' => 'Raabe',
+      'email_notification' => 'raabe@youpay.digital',
     ]);
     self::$charge_id = $response->id;
     $this->assertArrayHasKey('id', (array)$response);
@@ -39,10 +38,10 @@ class ChargeTest extends TestCase
   {
     $charge = new Charge();
     $response = $charge->payment([
-      'amount' => 9.0,
+      'amount' => 9.99,
       'idCharge' => self::$charge_id,
-      'customerName' => 'Edinaldo Felipe',
-      'customerDocument' => '07921246427'
+      'customerName' => 'Raabe',
+      'customerDocument' => '71532964099'
     ]);
     $this->assertArrayHasKey('id', (array)$response->charge);
   }

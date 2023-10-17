@@ -115,7 +115,7 @@ class Charge extends Resource
       'name_notification' =>  $params->name_notification ?? null,
       'cellphone_notification' => preg_replace('/[^\d]/', '', $params->cellphone_notification),
       'email_notification' => $params->email_notification ?? null,
-      'type_transaction' => $params->type_transaction ?? 'LATER', // LATER | NOW
+      'type_transaction' => $params->type_transaction ?? 'NOW', // LATER | NOW
     ];
   }
 
